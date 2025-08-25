@@ -1,4 +1,26 @@
 {
-  "name": "GymEquipmentApp",
-  "displayName": "GymEquipmentApp"
+  "expo": {
+    "name": "GymShop RN",
+    "slug": "gymshop-rn",
+    "scheme": "gymshoprn",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "automatic",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#0A0F1E"
+    },
+    "assetBundlePatterns": ["**/*"],
+    "ios": { "supportsTablet": true },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#0A0F1E"
+      },
+      "package": "com.example.gymshoprn"
+    },
+    "web": { "bundler": "metro", "output": "static" }
+  }
 }
