@@ -1,0 +1,92 @@
+const fs = require('fs').promises;
+const path = require('path');
+
+const artifactJson = {
+  "projectName": "GymEquipmentApp",
+  "files": [
+    {
+      "path": "App.js",
+      "content": "import React from 'react';\nimport AppNavigator from './src/navigation/AppNavigator';\nimport { CartProvider } from './src/context/CartContext';\n\nconst App = () => {\n  return (\n    <CartProvider>\n      <AppNavigator />\n    </CartProvider>\n  );\n};\n\nexport default App;"
+    },
+    {
+      "path": "src/data/demoData.js",
+      "content": "export const products = [\n  {\n    id: 1,\n    name: 'Adjustable Dumbbell Set',\n    price: 99.99,\n    description: 'High-quality adjustable dumbbells for versatile workouts. Range: 5-50 lbs.',\n    image: 'https://via.placeholder.com/300x300?text=Dumbbells',\n    category: 'Weights',\n  },\n  {\n    id: 2,\n    name: 'Treadmill Pro',\n    price: 499.99,\n    description: 'Electric treadmill with incline control and heart rate monitor.',\n    image: 'https://via.placeholder.com/300x300?text=Treadmill',\n    category: 'Cardio',\n  },\n  {\n    id: 3,\n    name: 'Yoga Mat Premium',\n    price: 29.99,\n    description: 'Eco-friendly non-slip yoga mat for comfort during sessions.',\n    image: 'https://via.placeholder.com/300x300?text=Yoga+Mat',\n    category: 'Accessories',\n  },\n  {\n    id: 4,\n    name: 'Kettlebell Set',\n    price: 79.99,\n    description: 'Cast iron kettlebells in various weights for strength training.',\n    image: 'https://via.placeholder.com/300x300?text=Kettlebells',\n    category: 'Weights',\n  },\n];\n\nexport const categories = ['Weights', 'Cardio', 'Accessories'];"
+    },
+    {
+      "path": "src/context/CartContext.js",
+      "content": "import React, { createContext, useState, useEffect } from 'react';\nimport AsyncStorage from '@react-native-community/async-storage';\n\nexport const CartContext = createContext();\n\nexport const CartProvider = ({ children }) => {\n  const [cartItems, setCartItems] = useState([]);\n\n  useEffect(() => {\n    const loadCart = async () => {\n      const storedCart = await AsyncStorage.getItem('cart');\n      if (storedCart) setCartItems(JSON.parse(storedCart));\n    };\n    loadCart();\n  }, []);\n\n  useEffect(() => {\n    AsyncStorage.setItem('cart', JSON.stringify(cartItems));\n  }, [cartItems]);\n\n  const addToCart = (product) => {\n    setCartItems((prev) => [...prev, { ...product, quantity: 1 }]);\n  };\n\n  const removeFromCart = (id) => {\n    setCartItems((prev) => prev.filter((item) => item.id !== id));\n  };\n\n  const updateQuantity = (id, quantity) => {\n    setCartItems((prev) =>\n      prev.map((item) => (item.id === id ? { ...item, quantity } : item))\n    );\n  };\n\n  const totalPrice = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);\n\n  return (\n    <CartContext.Provider value={{ cartItems, addToCart, removeFromCart, updateQuantity, totalPrice }}>\n      {children}\n    </CartContext.Provider>\n  );\n};"
+    },
+    {
+      "path": "src/navigation/AppNavigator.js",
+      "content": "import React from 'react';\nimport { NavigationContainer } from '@react-navigation/native';\nimport { createNativeStackNavigator } from '@react-navigation/native-stack';\nimport LoginScreen from '../screens/LoginScreen';\nimport SignupScreen from '../screens/SignupScreen';\nimport HomeScreen from '../screens/HomeScreen';\nimport ShopScreen from '../screens/ShopScreen';\nimport ProductDetailsScreen from '../screens/ProductDetailsScreen';\nimport CartScreen from '../screens/CartScreen';\nimport CheckoutScreen from '../screens/CheckoutScreen';\nimport ProfileScreen from '../screens/ProfileScreen';\n\nconst Stack = createNativeStackNavigator();\n\nconst AppNavigator = () => {\n  return (\n    <NavigationContainer>\n      <Stack.Navigator initialRouteName=\"Login\">\n        <Stack.Screen name=\"Login\" component={LoginScreen} options={{ headerShown: false }} />\n        <Stack.Screen name=\"Signup\" component={SignupScreen} options={{ headerShown: false }} />\n        <Stack.Screen name=\"Home\" component={HomeScreen} />\n        <Stack.Screen name=\"Shop\" component={ShopScreen} />\n        <Stack.Screen name=\"ProductDetails\" component={ProductDetailsScreen} />\n        <Stack.Screen name=\"Cart\" component={CartScreen} />\n        <Stack.Screen name=\"Checkout\" component={CheckoutScreen} />\n        <Stack.Screen name=\"Profile\" component={ProfileScreen} />\n      </Stack.Navigator>\n    </NavigationContainer>\n  );\n};\n\nexport default AppNavigator;"
+    },
+    {
+      "path": "src/components/ProductCard.js",
+      "content": "import React from 'react';\nimport { View, Text, Image, TouchableOpacity, StyleSheet } from 'react-native';\n\nconst ProductCard = ({ product, onPress }) => {\n  return (\n    <TouchableOpacity style={styles.card} onPress={onPress}>\n      <Image source={{ uri: product.image }} style={styles.image} />\n      <View style={styles.info}>\n        <Text style={styles.name}>{product.name}</Text>\n        <Text style={styles.price}>${product.price.toFixed(2)}</Text>\n      </View>\n    </TouchableOpacity>\n  );\n};\n\nconst styles = StyleSheet.create({\n  card: {\n    backgroundColor: '#1E1E1E',\n    borderRadius: 15,\n    margin: 10,\n    shadowColor: '#000',\n    shadowOpacity: 0.2,\n    shadowRadius: 5,\n    elevation: 5,\n    overflow: 'hidden',\n  },\n  image: {\n    width: '100%',\n    height: 150,\n  },\n  info: {\n    padding: 10,\n  },\n  name: {\n    color: '#FFF',\n    fontSize: 16,\n    fontWeight: 'bold',\n  },\n  price: {\n    color: '#00BFFF',\n    fontSize: 14,\n  },\n});\n\nexport default ProductCard;"
+    },
+    {
+      "path": "src/screens/LoginScreen.js",
+      "content": "import React, { useState } from 'react';\nimport { View, Text, TextInput, Button, StyleSheet, TouchableOpacity } from 'react-native';\n\nconst LoginScreen = ({ navigation }) => {\n  const [email, setEmail] = useState('');\n  const [password, setPassword] = useState('');\n\n  const handleLogin = () => {\n    navigation.navigate('Home');\n  };\n\n  return (\n    <View style={styles.container}>\n      <Text style={styles.title}>Login to GymGear</Text>\n      <TextInput style={styles.input} placeholder=\"Email\" value={email} onChangeText={setEmail} />\n      <TextInput style={styles.input} placeholder=\"Password\" secureTextEntry value={password} onChangeText={setPassword} />\n      <Button title=\"Login\" onPress={handleLogin} color=\"#FF4500\" />\n      <TouchableOpacity onPress={() => navigation.navigate('Signup')}>\n        <Text style={styles.link}>Don't have an account? Signup</Text>\n      </TouchableOpacity>\n    </View>\n  );\n};\n\nconst styles = StyleSheet.create({\n  container: { flex: 1, justifyContent: 'center', padding: 20, backgroundColor: '#121212' },\n  title: { fontSize: 24, color: '#FFF', textAlign: 'center', marginBottom: 20 },\n  input: { backgroundColor: '#333', color: '#FFF', padding: 10, marginBottom: 10, borderRadius: 5 },\n  link: { color: '#00BFFF', textAlign: 'center', marginTop: 10 },\n});\n\nexport default LoginScreen;"
+    },
+    {
+      "path": "src/screens/SignupScreen.js",
+      "content": "import React, { useState } from 'react';\nimport { View, Text, TextInput, Button, StyleSheet, TouchableOpacity } from 'react-native';\n\nconst SignupScreen = ({ navigation }) => {\n  const [name, setName] = useState('');\n  const [email, setEmail] = useState('');\n  const [password, setPassword] = useState('');\n\n  const handleSignup = () => {\n    navigation.navigate('Home');\n  };\n\n  return (\n    <View style={styles.container}>\n      <Text style={styles.title}>Signup for GymGear</Text>\n      <TextInput style={styles.input} placeholder=\"Name\" value={name} onChangeText={setName} />\n      <TextInput style={styles.input} placeholder=\"Email\" value={email} onChangeText={setEmail} />\n      <TextInput style={styles.input} placeholder=\"Password\" secureTextEntry value={password} onChangeText={setPassword} />\n      <Button title=\"Signup\" onPress={handleSignup} color=\"#FF4500\" />\n      <TouchableOpacity onPress={() => navigation.navigate('Login')}>\n        <Text style={styles.link}>Already have an account? Login</Text>\n      </TouchableOpacity>\n    </View>\n  );\n};\n\nconst styles = StyleSheet.create({\n  container: { flex: 1, justifyContent: 'center', padding: 20, backgroundColor: '#121212' },\n  title: { fontSize: 24, color: '#FFF', textAlign: 'center', marginBottom: 20 },\n  input: { backgroundColor: '#333', color: '#FFF', padding: 10, marginBottom: 10, borderRadius: 5 },\n  link: { color: '#00BFFF', textAlign: 'center', marginTop: 10 },\n});\n\nexport default SignupScreen;"
+    },
+    {
+      "path": "src/screens/HomeScreen.js",
+      "content": "import React from 'react';\nimport { View, Text, FlatList, StyleSheet } from 'react-native';\nimport { products } from '../data/demoData';\nimport ProductCard from '../components/ProductCard';\nimport Icon from 'react-native-vector-icons/MaterialIcons';\n\nconst HomeScreen = ({ navigation }) => {\n  return (\n    <View style={styles.container}>\n      <View style={styles.header}>\n        <Text style={styles.title}>Welcome to GymGear</Text>\n        <Icon name=\"shopping-cart\" size={24} color=\"#FFF\" onPress={() => navigation.navigate('Cart')} />\n      </View>\n      <Text style={styles.subtitle}>Featured Products</Text>\n      <FlatList\n        data={products.slice(0, 4)}\n        renderItem={({ item }) => (\n          <ProductCard product={item} onPress={() => navigation.navigate('ProductDetails', { product: item })} />\n        )}\n        keyExtractor={(item) => item.id.toString()}\n        horizontal\n      />\n      <Text style={styles.subtitle} onPress={() => navigation.navigate('Shop')}>Shop All</Text>\n    </View>\n  );\n};\n\nconst styles = StyleSheet.create({\n  container: { flex: 1, backgroundColor: '#121212', padding: 10 },\n  header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },\n  title: { fontSize: 22, color: '#FFF' },\n  subtitle: { fontSize: 18, color: '#00BFFF', marginVertical: 10 },\n});\n\nexport default HomeScreen;"
+    },
+    {
+      "path": "src/screens/ShopScreen.js",
+      "content": "import React from 'react';\nimport { View, Text, FlatList, StyleSheet } from 'react-native';\nimport { products } from '../data/demoData';\nimport ProductCard from '../components/ProductCard';\n\nconst ShopScreen = ({ navigation }) => {\n  return (\n    <View style={styles.container}>\n      <Text style={styles.title}>Shop Gym Equipment</Text>\n      <FlatList\n        data={products}\n        renderItem={({ item }) => (\n          <ProductCard product={item} onPress={() => navigation.navigate('ProductDetails', { product: item })} />\n        )}\n        keyExtractor={(item) => item.id.toString()}\n        numColumns={2}\n      />\n    </View>\n  );\n};\n\nconst styles = StyleSheet.create({\n  container: { flex: 1, backgroundColor: '#121212' },\n  title: { fontSize: 20, color: '#FFF', textAlign: 'center', margin: 10 },\n});\n\nexport default ShopScreen;"
+    },
+    {
+      "path": "src/screens/ProductDetailsScreen.js",
+      "content": "import React, { useContext } from 'react';\nimport { View, Text, Image, Button, StyleSheet } from 'react-native';\nimport { CartContext } from '../context/CartContext';\n\nconst ProductDetailsScreen = ({ route, navigation }) => {\n  const { product } = route.params;\n  const { addToCart } = useContext(CartContext);\n\n  return (\n    <View style={styles.container}>\n      <Image source={{ uri: product.image }} style={styles.image} />\n      <Text style={styles.name}>{product.name}</Text>\n      <Text style={styles.price}>${product.price.toFixed(2)}</Text>\n      <Text style={styles.description}>{product.description}</Text>\n      <Button title=\"Add to Cart\" onPress={() => { addToCart(product); navigation.navigate('Cart'); }} color=\"#FF4500\" />\n    </View>\n  );\n};\n\nconst styles = StyleSheet.create({\n  container: { flex: 1, backgroundColor: '#121212', padding: 20 },\n  image: { width: '100%', height: 250, borderRadius: 15 },\n  name: { color: '#FFF', fontSize: 24, marginVertical: 10 },\n  price: { color: '#00BFFF', fontSize: 20 },\n  description: { color: '#CCC', marginVertical: 10 },\n});\n\nexport default ProductDetailsScreen;"
+    },
+    {
+      "path": "src/screens/CartScreen.js",
+      "content": "import React, { useContext } from 'react';\nimport { View, Text, FlatList, Button, StyleSheet } from 'react-native';\nimport { CartContext } from '../context/CartContext';\n\nconst CartScreen = ({ navigation }) => {\n  const { cartItems, removeFromCart, updateQuantity, totalPrice } = useContext(CartContext);\n\n  const renderItem = ({ item }) => (\n    <View style={styles.item}>\n      <Text style={styles.name}>{item.name} x {item.quantity}</Text>\n      <Text style={styles.price}>${(item.price * item.quantity).toFixed(2)}</Text>\n      <Button title=\"Remove\" onPress={() => removeFromCart(item.id)} color=\"#FF4500\" />\n    </View>\n  );\n\n  return (\n    <View style={styles.container}>\n      <Text style={styles.title}>Your Cart</Text>\n      <FlatList data={cartItems} renderItem={renderItem} keyExtractor={(item) => item.id.toString()} />\n      <Text style={styles.total}>Total: ${totalPrice.toFixed(2)}</Text>\n      <Button title=\"Proceed to Checkout\" onPress={() => navigation.navigate('Checkout')} color=\"#00BFFF\" />\n    </View>\n  );\n};\n\nconst styles = StyleSheet.create({\n  container: { flex: 1, backgroundColor: '#121212', padding: 10 },\n  title: { fontSize: 20, color: '#FFF', textAlign: 'center' },\n  item: { flexDirection: 'row', justifyContent: 'space-between', backgroundColor: '#1E1E1E', padding: 10, marginBottom: 5, borderRadius: 5 },\n  name: { color: '#FFF' },\n  price: { color: '#00BFFF' },\n  total: { color: '#FFF', fontSize: 18, textAlign: 'right', marginVertical: 10 },\n});\n\nexport default CartScreen;"
+    },
+    {
+      "path": "src/screens/CheckoutScreen.js",
+      "content": "import React, { useContext, useState } from 'react';\nimport { View, Text, TextInput, Button, StyleSheet, Alert } from 'react-native';\nimport { CartContext } from '../context/CartContext';\n\nconst CheckoutScreen = ({ navigation }) => {\n  const { totalPrice, setCartItems } = useContext(CartContext);\n  const [address, setAddress] = useState('');\n  const [payment, setPayment] = useState('');\n\n  const handleCheckout = () => {\n    Alert.alert('Order Placed', 'Your order has been placed successfully!');\n    setCartItems([]);\n    navigation.navigate('Home');\n  };\n\n  return (\n    <View style={styles.container}>\n      <Text style={styles.title}>Checkout</Text>\n      <Text style={styles.total}>Total: ${totalPrice.toFixed(2)}</Text>\n      <TextInput style={styles.input} placeholder=\"Shipping Address\" value={address} onChangeText={setAddress} />\n      <TextInput style={styles.input} placeholder=\"Payment Details (Dummy)\" value={payment} onChangeText={setPayment} />\n      <Button title=\"Place Order\" onPress={handleCheckout} color=\"#FF4500\" />\n    </View>\n  );\n};\n\nconst styles = StyleSheet.create({\n  container: { flex: 1, backgroundColor: '#121212', padding: 20 },\n  title: { fontSize: 20, color: '#FFF', textAlign: 'center' },\n  total: { color: '#00BFFF', fontSize: 18, marginVertical: 10 },\n  input: { backgroundColor: '#333', color: '#FFF', padding: 10, marginBottom: 10, borderRadius: 5 },\n});\n\nexport default CheckoutScreen;"
+    },
+    {
+      "path": "src/screens/ProfileScreen.js",
+      "content": "import React from 'react';\nimport { View, Text, Button, StyleSheet } from 'react-native';\n\nconst ProfileScreen = ({ navigation }) => {\n  return (\n    <View style={styles.container}>\n      <Text style={styles.title}>Your Profile</Text>\n      <Text style={styles.info}>Name: John Doe</Text>\n      <Text style={styles.info}>Email: john@example.com</Text>\n      <Button title=\"Logout\" onPress={() => navigation.navigate('Login')} color=\"#FF4500\" />\n    </View>\n  );\n};\n\nconst styles = StyleSheet.create({\n  container: { flex: 1, backgroundColor: '#121212', padding: 20 },\n  title: { fontSize: 20, color: '#FFF' },\n  info: { color: '#CCC', marginVertical: 5 },\n});\n\nexport default ProfileScreen;"
+    },
+    {
+      "path": "package.json",
+      "content": "{\n  \"name\": \"GymEquipmentApp\",\n  \"version\": \"0.0.1\",\n  \"private\": true,\n  \"scripts\": {\n    \"android\": \"react-native run-android\",\n    \"ios\": \"react-native run-ios\",\n    \"start\": \"react-native start\",\n    \"test\": \"jest\"\n  },\n  \"dependencies\": {\n    \"@react-native-community/async-storage\": \"^1.12.1\",\n    \"@react-navigation/native\": \"^6.1.7\",\n    \"@react-navigation/native-stack\": \"^6.9.13\",\n    \"react\": \"18.2.0\",\n    \"react-native\": \"0.72.3\",\n    \"react-native-safe-area-context\": \"^4.7.1\",\n    \"react-native-screens\": \"^3.22.1\",\n    \"react-native-vector-icons\": \"^10.0.0\"\n  },\n  \"devDependencies\": {\n    \"@babel/core\": \"^7.20.0\",\n    \"@babel/preset-env\": \"^7.20.0\",\n    \"@babel/runtime\": \"^7.20.0\",\n    \"@react-native/babel-preset\": \"^0.72.0\",\n    \"@react-native/eslint-config\": \"^0.72.2\",\n    \"@react-native/metro-config\": \"^0.72.0\",\n    \"@tsconfig/react-native\": \"^3.0.0\",\n    \"@types/react\": \"^18.0.24\",\n    \"@types/react-test-renderer\": \"^18.0.0\",\n    \"babel-jest\": \"^29.2.1\",\n    \"eslint\": \"^8.19.0\",\n    \"jest\": \"^29.2.1\",\n    \"metro-react-native-babel-preset\": \"^0.76.0\",\n    \"prettier\": \"^2.4.1\",\n    \"react-test-renderer\": \"18.2.0\"\n  }\n}"
+    }
+  ]
+};
+
+async function createFiles() {
+  const projectRoot = artifactJson.projectName;
+
+  try {
+    // Create project root directory if it doesn't exist
+    await fs.mkdir(projectRoot, { recursive: true });
+
+    // Create each file
+    for (const fileInfo of artifactJson.files) {
+      const filePath = path.join(projectRoot, fileInfo.path);
+      const dirName = path.dirname(filePath);
+
+      // Create directory if it doesn't exist
+      await fs.mkdir(dirName, { recursive: true });
+
+      // Write file content
+      await fs.writeFile(filePath, fileInfo.content);
+      console.log(`Created file: ${filePath}`);
+    }
+
+    console.log(`Project files created in directory: ${projectRoot}`);
+  } catch (error) {
+    console.error('Error creating files:', error);
+  }
+}
+
+createFiles();
