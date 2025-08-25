@@ -1,23 +1,8 @@
-# GymShop RN (Expo + Redux Toolkit)
+# GymShop RN — Expo-ready
 
-A modern, eye‑catchy e‑commerce demo app for gym equipment built with **React Native (Expo)**.
-
-## Features
-- Auth (demo login/register)
-- Home, Shop (search + grid), Product Details
-- Cart with quantity controls
-- Checkout flow with fake payment/card field
-- Orders & Profile screens
-- Redux Toolkit for state
-
-## Quick Start
+Run:
 ```bash
-npm create expo@latest gymshop-rn -- --template blank
-cd gymshop-rn
-# Replace the generated project with these files:
-# 1) unzip the provided archive into this folder (overwrite files)
-npm i
-npx expo start
+npm install
+npx expo start -c
 ```
-
-> If you prefer, clone these files as-is and run `npm i && npx expo start`.
+Open in Expo Go on Android.
