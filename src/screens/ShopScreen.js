@@ -1,31 +1,23 @@
 import React from 'react';
-import { View, Text, FlatList, Image, Button, StyleSheet } from 'react-native';
-import { useDispatch } from 'react-redux';
-import { addToCart } from '../slices/cartSlice';
+import { View, Text, FlatList, Image, TouchableOpacity } from 'react-native';
 import { products } from '../data/products';
 
 export default function ShopScreen({ navigation }) {
-  const dispatch = useDispatch();
-
   return (
     <FlatList
       data={products}
-      keyExtractor={item => item.id}
+      keyExtractor={(item) => item.id.toString()}
       renderItem={({ item }) => (
-        <View style={styles.card}>
-          <Image source={{ uri: item.image }} style={styles.image} />
-          <Text style={styles.name}>{item.name}</Text>
-          <Text>${item.price}</Text>
-          <Button title="View" onPress={() => navigation.navigate('ProductDetails', { product: item })} />
-          <Button title="Add to Cart" onPress={() => dispatch(addToCart(item))} />
-        </View>
+        <TouchableOpacity onPress={() => navigation.navigate('ProductDetails', { product: item })}>
+          <View style={{ padding:10, flexDirection:'row', alignItems:'center' }}>
+            <Image source={{ uri: item.image }} style={{ width:80, height:80, marginRight:10 }} />
+            <View>
+              <Text style={{ fontSize:18 }}>{item.name}</Text>
+              <Text>${item.price}</Text>
+            </View>
+          </View>
+        </TouchableOpacity>
       )}
     />
   );
 }
-
-const styles = StyleSheet.create({
-  card: { padding: 10, margin: 10, backgroundColor: '#f9f9f9', borderRadius: 8 },
-  image: { width: '100%', height: 150, borderRadius: 8 },
-  name: { fontSize: 18, fontWeight: 'bold', marginTop: 5 }
-});

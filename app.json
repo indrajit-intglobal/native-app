@@ -1,0 +1,18 @@
+{
+  "expo": {
+    "name": "GymShop",
+    "slug": "gymshop-expo",
+    "version": "1.0.0",
+    "sdkVersion": "51.0.0",
+    "platforms": ["ios", "android", "web"],
+    "orientation": "portrait",
+    "icon": "./assets/logo.png",
+    "splash": {
+      "image": "./assets/logo.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
+    "updates": { "enabled": true },
+    "assetBundlePatterns": ["**/*"]
+  }
+}

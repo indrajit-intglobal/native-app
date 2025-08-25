@@ -1,37 +1,30 @@
 import React from 'react';
-import { View, Text, FlatList, Button, StyleSheet } from 'react-native';
+import { View, Text, FlatList, Button } from 'react-native';
 import { useSelector, useDispatch } from 'react-redux';
-import { removeFromCart, clearCart } from '../slices/cartSlice';
+import { removeFromCart, clearCart } from '../store/cartSlice';
 
 export default function CartScreen({ navigation }) {
-  const items = useSelector(state => state.cart.items);
+  const cart = useSelector(state => state.cart.items);
   const dispatch = useDispatch();
 
   return (
-    <View style={styles.container}>
+    <View style={{ flex:1, padding:20 }}>
       <FlatList
-        data={items}
-        keyExtractor={(item) => item.id}
+        data={cart}
+        keyExtractor={(item) => item.id.toString()}
         renderItem={({ item }) => (
-          <View style={styles.item}>
-            <Text>{item.name} x{item.quantity}</Text>
+          <View style={{ flexDirection:'row', justifyContent:'space-between', marginBottom:10 }}>
+            <Text>{item.name}</Text>
             <Button title="Remove" onPress={() => dispatch(removeFromCart(item.id))} />
           </View>
         )}
       />
-      {items.length > 0 ? (
+      {cart.length > 0 && (
         <>
           <Button title="Checkout" onPress={() => navigation.navigate('Checkout')} />
           <Button title="Clear Cart" onPress={() => dispatch(clearCart())} />
         </>
-      ) : (
-        <Text>Your cart is empty.</Text>
       )}
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: { flex: 1, padding: 20 },
-  item: { flexDirection: 'row', justifyContent: 'space-between', marginVertical: 5 }
-});
